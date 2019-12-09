@@ -33,30 +33,37 @@ for i in range(1, page_max+1):
     driver.get(url)
     sleep(2)
     products = driver.find_elements_by_css_selector(".s-include-content-margin")
-    print(len(driver.find_elements_by_css_selector(".s-include-content-margin")))
+    # print(len(driver.find_elements_by_css_selector(".s-include-content-margin")))
     for product in products:
         elem = driver.find_elements_by_css_selector("h2 a")
         links = []
         for e in elem:
             links.append(e.get_attribute("href"))
-        for link in links:
+        for link in links[:1]:
             # print(link)
             driver.get(link)
-            wait = is_visible('#productTitle', timeout=10)
-            sleep(2)
+            try:
+                wait = is_visible('#productTitle', timeout=10)
+            except:
+                print("Timeout... #productTitle")
+
             action = ActionChains(driver)
-            action.move_to_element(driver.find_elements_by_css_selector(".a-button-input")[0])
-            action.click()
-            action.perform()
+            elems = driver.find_elements_by_css_selector('#altImages ul li.item')
+            # Should not move cursor
+            for elem in elems:
+                sleep(1)
+                action.move_to_element(elem).perform()
+            # feel free to move  cursor
             name = get_value(driver, "#productTitle")
             description = get_value(driver, "#feature-bullets")
             images = driver.find_elements_by_css_selector(".a-text-center.a-fixed-left-grid-col.a-col-right #main-image-container ul.a-unordered-list.a-nostyle.a-horizontal.list.maintain-height li.image img")
             print("div container: ", images[0].get_attribute("innerHTML"))
             im = []
-            """
+
             for image in images:
                 im.append(image.get_attribute("src"))
                 print(im)
-            """
+
             #data = [name, link, description, sku, ingredients, nutrifacts, directions, "-".join(im)]
             #writer.writerow(data)
+    driver.close()
